@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhizobial Symbiotic Gene Compendium</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #f7f4ee; --surface: #ffffff; --border: #ddd8cc; --text: #1a1a18;
+    --muted: #6b6558; --accent: #1a3a2a; --accent2: #2d6a4f; --green-light: #d8f0e4;
+    --header-bg: linear-gradient(135deg,#1a3a2a 0%,#2d6a4f 60%,#1b4332 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'EB Garamond',Georgia,serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6}
+
+  header{background:var(--header-bg);color:#fff;padding:32px 40px 28px;border-bottom:4px solid #74c69d}
+  header .label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#95d5b2;margin-bottom:8px}
+  header h1{font-size:30px;font-weight:700;letter-spacing:-0.5px}
+  header p{color:#b7e4c7;font-size:14px;margin-top:6px;max-width:750px}
+  .stats{display:flex;gap:32px;margin-top:18px;flex-wrap:wrap}
+  .stat-val{font-size:24px;font-weight:700;color:#74c69d}
+  .stat-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#95d5b2;font-family:'JetBrains Mono',monospace}
+
+  .controls{padding:20px 40px 14px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+  .filter-btn{padding:5px 14px;border-radius:20px;border:1.5px solid #ccc;background:#fff;color:#555;cursor:pointer;font-family:'EB Garamond',serif;font-size:13px;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+  .filter-btn:hover{border-color:#888}
+  .filter-btn.active{color:#fff;font-weight:600}
+  .badge-count{background:rgba(255,255,255,.22);border-radius:10px;padding:0 7px;font-size:11px}
+  .filter-btn:not(.active) .badge-count{background:#eee;color:#777}
+  .search-row{display:flex;align-items:center;gap:12px}
+  #searchInput{padding:8px 16px;border-radius:8px;border:1.5px solid #ccc;font-family:'EB Garamond',serif;font-size:14px;width:360px;outline:none;transition:border .2s}
+  #searchInput:focus{border-color:#2d6a4f}
+  #countLabel{color:#888;font-size:13px}
+
+  .table-wrap{padding:20px 40px 40px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.08);font-size:13.5px}
+  thead tr{background:#1a3a2a}
+  th{padding:12px 14px;text-align:left;color:#95d5b2;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap}
+  th:hover{color:#fff}
+  td{padding:10px 14px;border-bottom:1px solid #f0ece4;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:nth-child(even) td{background:#faf8f4}
+  tr:hover td{background:#edf7f1!important}
+  .gene-name{font-family:'JetBrains Mono',monospace;font-weight:600;color:#1a3a2a;font-size:13px;white-space:nowrap}
+  .category-badge{display:inline-block;padding:2px 9px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#fff;white-space:nowrap}
+  .copy-badge{display:inline-block;min-width:30px;padding:2px 8px;border-radius:12px;font-weight:700;font-size:13px;text-align:center}
+  .copy-1{background:#e8f5e9;color:#2e7d32;border:1.5px solid #81c784}
+  .copy-gt1{background:#fff3e0;color:#e65100;border:1.5px solid #ffb74d}
+  /* Conservation badges */
+  .cons-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;font-family:'JetBrains Mono',monospace}
+  .cons-U{background:#1a3a2a;color:#95d5b2;border:1.5px solid #2d6a4f}
+  .cons-C{background:#e3f2fd;color:#1565c0;border:1.5px solid #90caf9}
+  .cons-V{background:#fff8e1;color:#f57f17;border:1.5px solid #ffe082}
+  .cons-R{background:#fce4ec;color:#c62828;border:1.5px solid #ef9a9a}
+  .refs{font-size:11.5px;color:#5a6a7a;line-height:1.6}
+  .refs a{color:#1565c0;text-decoration:none;font-weight:600}
+  .refs a:hover{text-decoration:underline}
+
+  /* Reference panel */
+  .ref-section{margin:0 40px 40px;background:var(--surface);border-radius:10px;border:1px solid var(--border);padding:28px 32px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .ref-section h2{font-size:20px;color:var(--accent);margin-bottom:16px;border-bottom:2px solid var(--green-light);padding-bottom:8px}
+  .ref-group{margin-bottom:24px}
+  .ref-group h3{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:1px dashed #ddd}
+  .ref-list{list-style:none}
+  .ref-list li{font-size:12.5px;color:#333;line-height:1.75;padding:6px 0 6px 18px;position:relative;border-bottom:1px dotted #ece8e0}
+  .ref-list li:last-child{border-bottom:none}
+  .ref-list li::before{content:'▸';position:absolute;left:0;color:#74c69d;font-size:10px;top:9px}
+  .ref-id{display:inline-block;background:#1a3a2a;color:#95d5b2;font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 6px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .ref-list a{color:#1565c0;text-decoration:none}
+  .ref-list a:hover{text-decoration:underline}
+  .ref-note{display:block;color:#666;font-size:11.5px;margin-top:2px;padding-left:2px;font-style:italic}
+
+  .legend{margin:0 40px 20px;background:#f0f7f4;border:1px solid #c8e6d4;border-radius:8px;padding:16px 20px;font-size:12.5px;color:#444}
+  .legend strong{color:#1a3a2a}
+  .legend ul{margin-top:8px;padding-left:20px}
+  .legend li{margin-bottom:3px}
+
+  footer{text-align:center;padding:20px 40px;font-size:11px;color:#aaa;border-top:1px solid var(--border);background:#f0ede6}
+  footer a{color:#1565c0;text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:800px){
+    header,.controls,.table-wrap,.ref-section,.legend{padding-left:16px;padding-right:16px}
+    #searchInput{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Research Reference Tool · Symbiotic Microbiology</div>
+  <h1>Rhizobial Symbiotic Gene Compendium</h1>
+  <p>Comprehensive reference of symbiotic genes in <em>Bradyrhizobium</em> spp. and related rhizobia (<em>Sinorhizobium</em>, <em>Rhizobium</em>, <em>Mesorhizobium</em>, <em>Azorhizobium</em> and others), with verified literature citations and hyperlinks. Covers nodulation (<em>nod/nol/noe</em>), nitrogen fixation (<em>nif/fix</em>), hydrogen uptake (<em>hup/hyp</em>), type III secretion (<em>T3SS/nop</em>), and regulatory genes. Primary focus on <em>Bradyrhizobium</em>.</p>
+  <div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#74c69d;font-family:'JetBrains Mono',monospace;">Developed by</span>
+    <span style="font-size:14px;color:#fff;font-weight:600;">Martin Coetzee</span>
+    <span style="color:#2d6a4f;font-size:14px;">·</span>
+    <span style="font-size:13px;color:#b7e4c7;font-style:italic;">Forestry and Agricultural Biotechnology Institute (FABI)</span>
+    <span style="color:#2d6a4f;font-size:14px;">·</span>
+    <span style="font-size:13px;color:#b7e4c7;">University of Pretoria</span>
+    <span style="color:#2d6a4f;font-size:14px;">·</span>
+    <span style="font-size:13px;color:#b7e4c7;">in collaboration with <strong style="color:#fff;">Claude AI</strong> (Anthropic)</span>
+  </div>
+  <div class="stats">
+    <div><div class="stat-val" id="totalCount">120</div><div class="stat-lbl">Total Genes</div></div>
+    <div><div class="stat-val">8</div><div class="stat-lbl">Gene Families</div></div>
+    <div><div class="stat-val">9</div><div class="stat-lbl">Multi-copy Genes</div></div>
+    <div><div class="stat-val">56</div><div class="stat-lbl">Key References</div></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="filter-row" id="filterRow"></div>
+  <div class="filter-row" id="consFilterRow" style="margin-bottom:6px;">
+    <span style="font-size:11px;color:#888;font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-right:4px;">CONSERVATION:</span>
+  </div>
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="Search gene, function, organism or notes…">
+    <span id="countLabel"></span>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table id="geneTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable('gene')">Gene ⇅</th>
+        <th onclick="sortTable('cat')">Family ⇅</th>
+        <th onclick="sortTable('cons')">Conservation ⇅</th>
+        <th onclick="sortTable('func')">Function / Role ⇅</th>
+        <th onclick="sortTable('org')">Organism(s) ⇅</th>
+        <th onclick="sortTable('copy')">Max Copies ⇅</th>
+        <th>Notes</th>
+        <th>Key Reference(s)</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <strong>Copy Number:</strong>
+  <span style="background:#e8f5e9;color:#2e7d32;border:1.5px solid #81c784;border-radius:12px;padding:1px 8px;font-weight:700;">1</span> = single copy typical &nbsp;|&nbsp;
+  <span style="background:#fff3e0;color:#e65100;border:1.5px solid #ffb74d;border-radius:12px;padding:1px 8px;font-weight:700;">2+</span> = multiple copies reported in at least one strain.
+  <br><br>
+  <strong>Conservation across diazotrophic Bradyrhizobium / rhizobia:</strong>&nbsp;
+  <span class="cons-badge cons-U">● Universal</span> present in all diazotrophic rhizobia &nbsp;|&nbsp;
+  <span class="cons-badge cons-C">● Common</span> present in most; very few exceptions &nbsp;|&nbsp;
+  <span class="cons-badge cons-V">◐ Variable</span> widespread but genus/clade-restricted &nbsp;|&nbsp;
+  <span class="cons-badge cons-R">○ Restricted</span> strain- or species-specific
+  <ul style="margin-top:10px;">
+    <li><strong>nod/nol/noe</strong> — Nod factor (LCO) biosynthesis, decoration, and export genes. <em>nodABCDIJ</em> are universal among nod-based nodulators; all others are accessory.</li>
+    <li><strong>nif</strong> — Nitrogen fixation structural/biosynthetic genes. <em>nifHDKENBASU</em> are universally conserved across all diazotrophs.</li>
+    <li><strong>fix</strong> — Rhizobia-specific symbiotic N₂ fixation genes. <em>fixABCX</em> and <em>fixNOQPGHIS</em> are universal in symbiotic rhizobia. <em>etfSL</em> are housekeeping ETF paralogs (Group I) distinct from the symbiotic FixA/FixB (Group II).</li>
+    <li><strong>hup/hyp</strong> — Hydrogen uptake hydrogenase and maturation genes; variable — present in Hup⁺ strains only.</li>
+    <li><strong>T3SS/nop</strong> — Type III secretion system and effectors; variable — widespread in Bradyrhizobium but not universal.</li>
+    <li><strong>Regulatory/Other</strong> — σ⁵⁴ (<em>rpoN</em>) is universal; others are variable or Bradyrhizobium-specific.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════ REFERENCE SECTION ══════════════════════ -->
+<div class="ref-section">
+  <h2>📚 Literature References</h2>
+
+  <div class="ref-group">
+    <h3>Genome Sequences — Bradyrhizobium</h3>
+    <ul class="ref-list">
+      <li>
+        <span class="ref-id">R1</span>
+        Kaneko T, Nakamura Y, Sato S, Minamisawa K, Uchiumi T, et al. (2002). Complete genomic sequence of nitrogen-fixing symbiotic bacterium <em>Bradyrhizobium japonicum</em> USDA110. <em>DNA Research</em> 9(6):189–197.
+        [<a href="https://doi.org/10.1093/dnares/9.6.189" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/12597275/" target="_blank">PubMed</a>]
+        [<a href="https://academic.oup.com/dnaresearch/article/9/6/189/424837" target="_blank">Full Text</a>]
+        <span class="ref-note">Primary USDA110 genome reference; identifies the 681-kb symbiosis island and all nod/nif/fix gene loci.</span>
+      </li>
+      <li>
+        <span class="ref-id">R2</span>
+        Kaneko T, Nakamura Y, Sato S, Minamisawa K, Uchiumi T, et al. (2002). Complete genomic sequence of nitrogen-fixing symbiotic bacterium <em>Bradyrhizobium japonicum</em> USDA110 (Supplement). <em>DNA Research</em> 9(6):225–256.
+        [<a href="https://doi.org/10.1093/dnares/9.6.225" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/12597279/" target="_blank">PubMed</a>]
+        [<a href="https://academic.oup.com/dnaresearch/article/9/6/225/424846" target="_blank">Full Text</a>]
+        <span class="ref-note">Supplementary gene tables and annotation for all symbiotic regions of USDA110.</span>
+      </li>
+      <li>
+        <span class="ref-id">R3</span>
+        Kaneko T, Maita H, Hirakawa H, Uchiike N, Minamisawa K, et al. (2011). Complete genome sequence of the soybean symbiont <em>Bradyrhizobium japonicum</em> strain USDA6<sup>T</sup>. <em>Genes (Basel)</em> 2:763–787.
+        [<a href="https://doi.org/10.3390/genes2040763" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/24306093/" target="_blank">PubMed</a>]
+      </li>
+      <li>
+        <span class="ref-id">R4</span>
+        Giraud E, Moulin L, Vallenet D, Barbe V, Cytryn E, et al. (2007). Legumes symbioses: absence of Nod genes in photosynthetic bradyrhizobia. <em>Science</em> 316(5829):1307–1312.
+        [<a href="https://doi.org/10.1126/science.1139548" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/17540897/" target="_blank">PubMed</a>]
+        <span class="ref-note">Photosynthetic BTAi1 and ORS278 genomes; nod-independent symbiosis; nifV requirement for Aeschynomene strains.</span>
+      </li>
+      <li>
+        <span class="ref-id">R5</span>
+        Okubo T, Fukushima S, Itakura M, Oshima K, et al. (2013). Genome analysis of <em>Bradyrhizobium oligotrophicum</em> S58. <em>Applied and Environmental Microbiology</em> 79(8):2542–2551.
+        [<a href="https://doi.org/10.1128/AEM.00009-13" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/23377944/" target="_blank">PubMed</a>]
+      </li>
+      <li>
+        <span class="ref-id">R6</span>
+        Göttfert M, Röthlisberger S, Kündig C, Beck C, Marty R, Hennecke H. (2001). Potential symbiosis-specific genes uncovered by sequencing a 410-kilobase DNA region of the <em>Bradyrhizobium japonicum</em> chromosome. <em>Journal of Bacteriology</em> 183(4):1405–1412.
+        [<a href="https://doi.org/10.1128/JB.183.4.1405-1412.2001" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/11157955/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC95018/" target="_blank">PMC</a>]
+        <span class="ref-note">Systematic identification of nod/nol/noe genes in the B. japonicum symbiosis island.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ref-group">
+    <h3>nod / nol / noe Genes — Nodulation and Nod Factor Biosynthesis</h3>
+    <ul class="ref-list">
+      <li>
+        <span class="ref-id">R7</span>
+        Dénarié J, Debellé F, Promé J-C. (1996). Rhizobium lipo-chitooligosaccharide nodulation factors: signaling molecules mediating recognition and morphogenesis. <em>Annual Review of Biochemistry</em> 65:503–535.
+        [<a href="https://doi.org/10.1146/annurev.bi.65.070196.002443" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8811188/" target="_blank">PubMed</a>]
+        <span class="ref-note">Landmark review — covers all nodABC core functions, nol and noe gene roles, host specificity, Nod factor structure.</span>
+      </li>
+      <li>
+        <span class="ref-id">R8</span>
+        Spaink HP, Wijfjes AHM, Lugtenberg BJJ. (1995). Rhizobium NodI and NodJ proteins play a role in the efficiency of secretion of lipochitin oligosaccharides. <em>Journal of Bacteriology</em> 177(21):6276–6281.
+        [<a href="https://doi.org/10.1128/jb.177.21.6276-6281.1995" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/7592394/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC177469/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines NodI/NodJ ABC transporter role in LCO export across the inner membrane.</span>
+      </li>
+      <li>
+        <span class="ref-id">R9</span>
+        John M, Röhrig H, Schmidt J, Wieneke U, Schell J. (1993). Rhizobium NodB protein involved in nodulation signal synthesis is a chitooligosaccharide deacetylase. <em>PNAS</em> 90(2):625–629.
+        [<a href="https://doi.org/10.1073/pnas.90.2.625" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8421698/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC45712/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines NodB enzymatic function as chitooligosaccharide deacetylase.</span>
+      </li>
+      <li>
+        <span class="ref-id">R10</span>
+        Kamst E, Pilling J, Raamsdonk LM, Lugtenberg BJJ, Spaink HP. (1997). Rhizobium nodulation protein NodC is an important determinant of chitin oligosaccharide chain length in Nod factor biosynthesis. <em>Journal of Bacteriology</em> 179(7):2103–2108.
+        [<a href="https://doi.org/10.1128/jb.179.7.2103-2108.1997" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/9079891/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC178940/" target="_blank">PMC</a>]
+        <span class="ref-note">NodC as N-acetylglucosaminyltransferase; determines chitin chain length.</span>
+      </li>
+      <li>
+        <span class="ref-id">R11</span>
+        Stacey G, Luka S, Sanjuan J, Banfalvi Z, Nieuwkoop AJ, et al. (1994). nodZ, a unique host-specific nodulation gene, is involved in the fucosylation of the lipooligosaccharide nodulation signal of <em>Bradyrhizobium japonicum</em>. <em>Journal of Bacteriology</em> 176(3):620–633.
+        [<a href="https://doi.org/10.1128/jb.176.3.620-633.1994" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8300517/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC205089/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines nodZ fucosyltransferase in B. japonicum; key host-range determinant.</span>
+      </li>
+      <li>
+        <span class="ref-id">R12</span>
+        Sadowsky MJ, Cregan PB, Göttfert M, Sharma A, Gerhold D, et al. (1991). The <em>Bradyrhizobium japonicum</em> nolA gene and its involvement in the genotype-specific nodulation of soybeans. <em>PNAS</em> 88(2):637–641.
+        [<a href="https://doi.org/10.1073/pnas.88.2.637" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/1992456/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC50863/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines NolA as a MerR-type regulator of genotype-specific nodulation; repressor of nodD2.</span>
+      </li>
+      <li>
+        <span class="ref-id">R13</span>
+        Baev N, Schultze M, Barlier I, Ha DC, Virelizier H, Kondorosi E, Kondorosi A. (1992). Rhizobium nodM and nodN genes are common nod genes: nodM encodes functions for efficiency of Nod signal production and bacteroid maturation. <em>Journal of Bacteriology</em> 174(23):7555–7565.
+        [<a href="https://doi.org/10.1128/jb.174.23.7555-7565.1992" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/1447128/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC207465/" target="_blank">PMC</a>]
+        <span class="ref-note">NodM glucosamine synthase function; NodN role in Nod signal production.</span>
+      </li>
+      <li>
+        <span class="ref-id">R14</span>
+        Mergaert P, D'Haeze W, Fernández-López M, Geelen D, Goethals K, et al. (1996). Fucosylation and arabinosylation of Nod factors in <em>Azorhizobium caulinodans</em>: involvement of nolK, nodZ as well as noeC and/or downstream genes. <em>Molecular Microbiology</em> 21(2):409–419.
+        [<a href="https://doi.org/10.1046/j.1365-2958.1996.6451366.x" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8858594/" target="_blank">PubMed</a>]
+        <span class="ref-note">nolK role in GDP-fucose biosynthesis; noeC accessory function.</span>
+      </li>
+      <li>
+        <span class="ref-id">R15</span>
+        Corvera A, Promé D, Promé J-C, Martínez-Romero E, Romero D. (1999). The nolL gene from <em>Rhizobium etli</em> determines nodulation efficiency by mediating the acetylation of the fucosyl residue in the nodulation factor. <em>Molecular Plant-Microbe Interactions</em> 12(3):236–246.
+        [<a href="https://doi.org/10.1094/MPMI.1999.12.3.236" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/10065556/" target="_blank">PubMed</a>]
+        <span class="ref-note">nolL O-acetyltransferase activity on fucosyl residue; host specificity.</span>
+      </li>
+      <li>
+        <span class="ref-id">R16</span>
+        Geelen D, Mergaert P, Geremia RA, Goormachtig S, Van Montagu M, Holsters M. (1993). Identification of nodSUIJ genes in Nod locus 1 of <em>Azorhizobium caulinodans</em>: evidence that nodS encodes a methyltransferase involved in Nod factor modification. <em>Molecular Microbiology</em> 9(1):145–154.
+        [<a href="https://doi.org/10.1111/j.1365-2958.1993.tb01676.x" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8412666/" target="_blank">PubMed</a>]
+        <span class="ref-note">nodS N-methyltransferase function in Nod factor modification.</span>
+      </li>
+      <li>
+        <span class="ref-id">R17</span>
+        Roche P, Debellé F, Maillet F, Lerouge P, Faucher C, et al. (1991). Molecular basis of symbiotic host specificity in <em>Rhizobium meliloti</em>: nodH and nodPQ genes encode the sulfation of lipo-oligosaccharide signals. <em>Cell</em> 67(6):1131–1143.
+        [<a href="https://doi.org/10.1016/0092-8674(91)90290-f" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/1760841/" target="_blank">PubMed</a>]
+        <span class="ref-note">nodH sulfotransferase and nodPQ sulfate activation; absent in most Bradyrhizobium.</span>
+      </li>
+      <li>
+        <span class="ref-id">R18</span>
+        Sanjuan J, Carlson RW, Spaink HP, Bhat UR, Barbour WM, Glushka J, Stacey G. (1992). A 2-O-methylfucose moiety is present in the lipo-oligosaccharide nodulation signal of <em>Bradyrhizobium japonicum</em>. <em>PNAS</em> 89(18):8789–8793.
+        [<a href="https://doi.org/10.1073/pnas.89.18.8789" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/1528890/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC50017/" target="_blank">PMC</a>]
+        <span class="ref-note">Identifies 2-O-methylfucose on B. japonicum Nod factors; noeI methyltransferase context.</span>
+      </li>
+      <li>
+        <span class="ref-id">R19</span>
+        Loh J, Stacey G. (2003). Nodulation gene regulation in <em>Bradyrhizobium japonicum</em>: a unique integration of global regulatory circuits. <em>Applied and Environmental Microbiology</em> 69(1):10–17.
+        [<a href="https://doi.org/10.1128/aem.69.1.10-17.2003" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/12513974/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC152446/" target="_blank">PMC</a>]
+        <span class="ref-note">Review of all B. japonicum nod/nol/noe gene regulation; NodD, NodW, NolA circuits.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ref-group">
+    <h3>nif Genes — Nitrogenase Structure and Biosynthesis</h3>
+    <ul class="ref-list">
+      <li>
+        <span class="ref-id">R20</span>
+        Fischer H-M. (1994). Genetic regulation of nitrogen fixation in rhizobia. <em>Microbiological Reviews</em> 58(3):352–386.
+        [<a href="https://doi.org/10.1128/mr.58.3.352-386.1994" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/7968919/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC372977/" target="_blank">PMC</a>]
+        <span class="ref-note">Comprehensive review of all nif and fix gene regulation in B. japonicum, S. meliloti, A. caulinodans; nifA, FixLJ, FixK cascades.</span>
+      </li>
+      <li>
+        <span class="ref-id">R21</span>
+        Howard JB, Rees DC. (1996). Structural basis of biological nitrogen fixation. <em>Chemical Reviews</em> 96(7):2965–2982.
+        [<a href="https://doi.org/10.1021/cr9500545" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/11848848/" target="_blank">PubMed</a>]
+        <span class="ref-note">Defines NifH, NifD, NifK structural roles; Mo-nitrogenase mechanism.</span>
+      </li>
+      <li>
+        <span class="ref-id">R22</span>
+        Rubio LM, Ludden PW. (2008). Biosynthesis of the iron-molybdenum cofactor of nitrogenase. <em>Annual Review of Microbiology</em> 62:93–111.
+        [<a href="https://doi.org/10.1146/annurev.micro.62.081307.162737" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/18429691/" target="_blank">PubMed</a>]
+        <span class="ref-note">Detailed review of nifB, nifE, nifN, nifX, nifS, nifU, nifV, nifW, nifY, nifZ, nifQ cofactor assembly pathway.</span>
+      </li>
+      <li>
+        <span class="ref-id">R23</span>
+        Morett E, Fischer H-M, Hennecke H. (1991). Influence of oxygen on DNA binding, positive control, and stability of the <em>Bradyrhizobium japonicum</em> NifA regulatory protein. <em>Journal of Bacteriology</em> 173(10):3478–3487.
+        [<a href="https://doi.org/10.1128/jb.173.10.3478-3487.1991" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/1827119/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC207957/" target="_blank">PMC</a>]
+        <span class="ref-note">Characterises NifA oxygen sensitivity and σ⁵⁴-dependent activation in B. japonicum.</span>
+      </li>
+      <li>
+        <span class="ref-id">R24</span>
+        Nukui N, Minamisawa K, Ayabe S, Aoki T. (2006). Expression of the 1-aminocyclopropane-1-carboxylic acid deaminase gene requires symbiotic nitrogen-fixing regulator gene nifA2 in <em>Mesorhizobium loti</em> MAFF303099. <em>Applied and Environmental Microbiology</em> 72(7):4774–4779.
+        [<a href="https://doi.org/10.1128/AEM.00119-06" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/16820469/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1489350/" target="_blank">PMC</a>]
+        <span class="ref-note">Demonstrates two nifA copies (nifA1/nifA2) in M. loti and their functional divergence.</span>
+      </li>
+      <li>
+        <span class="ref-id">R25</span>
+        Kullik I, Fritsche S, Knobel H, Sanjuan J, Hennecke H, Fischer H-M. (1991). <em>Bradyrhizobium japonicum</em> has two differentially regulated, functional homologs of the σ54 gene (rpoN). <em>Journal of Bacteriology</em> 173(5):1125–1138.
+        [<a href="https://doi.org/10.1128/jb.173.5.1125-1138.1991" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/1704877/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC207226/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines rpoN1/rpoN2 two-copy arrangement in B. japonicum and their roles in nif gene activation.</span>
+      </li>
+      <li>
+        <span class="ref-id">R53</span>
+        Hauser F, Pessi G, Friberg M, Weber C, Rusca N, Lindemann A, Fischer H-M, Hennecke H. (2007). Dissection of the <em>Bradyrhizobium japonicum</em> NifA+σ⁵⁴ regulon, and identification of a ferredoxin gene (fdxN) for symbiotic nitrogen fixation. <em>Molecular Genetics and Genomics</em> 278(3):255–271.
+        [<a href="https://doi.org/10.1007/s00438-007-0246-9" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/17569992/" target="_blank">PubMed</a>]
+        [<a href="https://link.springer.com/article/10.1007/s00438-007-0246-9" target="_blank">Full Text</a>]
+        <span class="ref-note">Genome-wide characterisation of the B. japonicum NifA+σ⁵⁴ regulon; identifies fdxN as a NifA-regulated ferredoxin required for efficient symbiotic N₂ fixation and candidate direct electron donor to nitrogenase.</span>
+      </li>
+      <li>
+        <span class="ref-id">R54</span>
+        Klipp W, Reiländer H, Schlüter A, Krey R, Pühler A. (1989). The <em>Rhizobium meliloti</em> fdxN gene encoding a ferredoxin-like protein is necessary for nitrogen fixation and is cotranscribed with nifA and nifB. <em>Molecular and General Genetics</em> 216(2–3):293–302.
+        [<a href="https://doi.org/10.1007/BF00334368" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/2549369/" target="_blank">PubMed</a>]
+        <span class="ref-note">Establishes that fdxN is absolutely required for symbiotic N₂ fixation in S. meliloti; defines the nifA-nifB-fdxN operon; functional cysteine motifs characterised.</span>
+      </li>
+      <li>
+        <span class="ref-id">R55</span>
+        Ebeling S, Noti JD, Hennecke H. (1988). Identification of a new <em>Bradyrhizobium japonicum</em> gene (frxA) encoding a ferredoxin-like protein. <em>Journal of Bacteriology</em> 170(4):1999–2001.
+        [<a href="https://doi.org/10.1128/jb.170.4.1999-2001.1988" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/3350797/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC211006/" target="_blank">PMC</a>]
+        <span class="ref-note">Original identification of frxA (fdxA) as a novel ferredoxin-like protein gene in B. japonicum; distinct from fdxN.</span>
+      </li>
+      <li>
+        <span class="ref-id">R56</span>
+        Weidenhaupt M, Rossi P, Beck C, Fischer H-M, Hennecke H. (1996). <em>Bradyrhizobium japonicum</em> possesses two discrete sets of electron transfer flavoprotein genes: fixA, fixB and etfS, etfL. <em>Archives of Microbiology</em> 165(3):169–178.
+        [<a href="https://doi.org/10.1007/BF01692858" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8599534/" target="_blank">PubMed</a>]
+        <span class="ref-note">Identifies and characterises etfS and etfL as bona fide housekeeping ETF genes (Group I), distinct from the symbiosis-specific fixA/fixB (Group II); aerobically expressed; provides the two-ETF-family framework for B. japonicum.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ref-group">
+    <h3>fix Genes — Microaerobic Respiration and Regulatory Cascades</h3>
+    <ul class="ref-list">
+      <li>
+        <span class="ref-id">R26</span>
+        Preisig O, Zufferey R, Thöny-Meyer L, Appleby CA, Hennecke H. (1996). A high-affinity cbb3-type cytochrome oxidase terminates the symbiosis-specific respiratory chain of <em>Bradyrhizobium japonicum</em>. <em>Journal of Bacteriology</em> 178(6):1532–1538.
+        [<a href="https://doi.org/10.1128/jb.178.6.1532-1538.1996" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8626278/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC177878/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines fixNOQP-encoded cbb3 oxidase biochemical properties; key fix gene reference.</span>
+      </li>
+      <li>
+        <span class="ref-id">R27</span>
+        Preisig O, Zufferey R, Hennecke H. (1996). The <em>Bradyrhizobium japonicum</em> fixGHIS genes are required for the formation of the high-affinity cbb3-type cytochrome oxidase. <em>Archives of Microbiology</em> 165(5):297–305.
+        [<a href="https://doi.org/10.1007/s002030050330" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8661920/" target="_blank">PubMed</a>]
+        <span class="ref-note">Defines fixGHIS role in cbb3 oxidase assembly; copper chaperone function of FixG/FixI.</span>
+      </li>
+      <li>
+        <span class="ref-id">R28</span>
+        Preisig O, Anthamatten D, Hennecke H. (1993). Genes for a microaerobically induced oxidase complex in <em>Bradyrhizobium japonicum</em> are essential for a nitrogen-fixing endosymbiosis. <em>PNAS</em> 90(8):3309–3313.
+        [<a href="https://doi.org/10.1073/pnas.90.8.3309" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8386371/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC46291/" target="_blank">PMC</a>]
+        <span class="ref-note">First demonstration that fixNOQP mutations abolish symbiotic N₂ fixation; discovery paper.</span>
+      </li>
+      <li>
+        <span class="ref-id">R29</span>
+        Bauer E, Kaspar T, Fischer H-M, Hennecke H. (1998). Expression of the fixR-nifA operon in <em>Bradyrhizobium japonicum</em> depends on a new response regulator, RegR. <em>Journal of Bacteriology</em> 180(15):3853–3863.
+        [<a href="https://doi.org/10.1128/JB.180.15.3853-3863.1998" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/9683488/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC107369/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines the fixR-nifA operon and RegSR (RegR) two-component system as primary O₂-sensing cascade in B. japonicum (replaces FixLJ).</span>
+      </li>
+      <li>
+        <span class="ref-id">R30</span>
+        Mesa S, Bedmar EJ, Chanfon A, Hennecke H, Fischer H-M. (2003). <em>Bradyrhizobium japonicum</em> NifA is a target for FixK2-mediated repression. <em>Journal of Bacteriology</em> 185(21):6392–6396.
+        [<a href="https://doi.org/10.1128/JB.185.21.6392-6396.2003" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/14563876/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC219393/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines FixK2 as main transcriptional activator of fixNOQP; describes 2 fixK copies in B. japonicum.</span>
+      </li>
+      <li>
+        <span class="ref-id">R31</span>
+        Gubler M, Hennecke H. (1986). fixA, fixB and fixC genes are essential for symbiotic and free-living microaerobic nitrogen fixation. <em>FEBS Letters</em> 200(1):186–192.
+        [<a href="https://doi.org/10.1016/0014-5793(86)80535-5" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/3011394/" target="_blank">PubMed</a>]
+        <span class="ref-note">Defines fixABCX operon essentiality in B. japonicum.</span>
+      </li>
+      <li>
+        <span class="ref-id">R32</span>
+        Earl CD, Ronson CW, Ausubel FM. (1987). Genetic and structural analysis of the <em>Rhizobium meliloti</em> fixA, fixB, fixC, and fixX genes. <em>Journal of Bacteriology</em> 169(3):1127–1136.
+        [<a href="https://doi.org/10.1128/jb.169.3.1127-1136.1987" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/3029022/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC212002/" target="_blank">PMC</a>]
+        <span class="ref-note">Original description and structural analysis of the fixABCX operon.</span>
+      </li>
+      <li>
+        <span class="ref-id">R33</span>
+        Lindström K, Mousavi SA. (2020). Effectiveness of nitrogen fixation in rhizobia. <em>Microbial Biotechnology</em> 13(5):1314–1335.
+        [<a href="https://doi.org/10.1111/1751-7915.13517" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/31957980/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7415380/" target="_blank">PMC</a>]
+        <span class="ref-note">Comprehensive modern review; covers nosZ, fixLJ, fnrN, regSR, hup, and all major gene families across rhizobia.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ref-group">
+    <h3>hup / hyp Genes — Hydrogenase and Maturation</h3>
+    <ul class="ref-list">
+      <li>
+        <span class="ref-id">R34</span>
+        Baginsky C, Brito B, Imperial J, Ruiz-Argüeso T, Palacios JM. (2002). Diversity and evolution of hydrogenase systems in rhizobia. <em>Applied and Environmental Microbiology</em> 68(10):4915–4924.
+        [<a href="https://doi.org/10.1128/AEM.68.10.4915-4924.2002" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/12324341/" target="_blank">PubMed</a>]
+        [<a href="https://journals.asm.org/doi/10.1128/aem.68.10.4915-4924.2002" target="_blank">Full Text</a>]
+        <span class="ref-note">Comprehensive survey of hup/hyp gene distribution, organisation, and evolution across rhizobia.</span>
+      </li>
+      <li>
+        <span class="ref-id">R35</span>
+        Sayavedra-Soto LA, Powell GK, Evans HJ, Morris RO. (1988). Nucleotide sequence of the genetic loci encoding subunits of <em>Bradyrhizobium japonicum</em> uptake hydrogenase. <em>PNAS</em> 85(23):8395–8399.
+        [<a href="https://doi.org/10.1073/pnas.85.23.8395" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/3194393/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC282458/" target="_blank">PMC</a>]
+        <span class="ref-note">Original sequencing and characterisation of hupS and hupL structural genes.</span>
+      </li>
+      <li>
+        <span class="ref-id">R36</span>
+        Fu C, Maier RJ. (1994). Organization of the hydrogenase gene cluster from <em>Bradyrhizobium japonicum</em>: sequences and analysis of five more hydrogenase-related genes (hupGHIJK). <em>Gene</em> 145(1):91–96.
+        [<a href="https://doi.org/10.1016/0378-1119(94)90328-x" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/8045431/" target="_blank">PubMed</a>]
+        <span class="ref-note">Defines hupG, hupH, hupI, hupJ, hupK accessory protein functions in hydrogenase assembly.</span>
+      </li>
+      <li>
+        <span class="ref-id">R37</span>
+        Black LK, Fu C, Maier RJ. (1994). Sequences and characterization of hupU and hupV genes of <em>Bradyrhizobium japonicum</em> encoding a possible nickel-sensing complex involved in hydrogenase expression. <em>Journal of Bacteriology</em> 176(22):7102–7106.
+        [<a href="https://doi.org/10.1128/jb.176.22.7102-7106.1994" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/7961479/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC197083/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines HupUV regulatory hydrogenase as a Ni/H₂-sensing complex.</span>
+      </li>
+      <li>
+        <span class="ref-id">R38</span>
+        Van Soom C, Lerouge I, Vanderleyden J, Ruiz-Argüeso T, Palacios JM. (1999). Identification and characterization of hupT, a gene involved in negative regulation of hydrogen oxidation in <em>Bradyrhizobium japonicum</em>. <em>Journal of Bacteriology</em> 181(15):5085–5089.
+        [<a href="https://doi.org/10.1128/JB.181.15.5085-5089.1999" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/10438784/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC94000/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines HupT histidine kinase role in repression of hupSL transcription in absence of H₂.</span>
+      </li>
+      <li>
+        <span class="ref-id">R39</span>
+        Tsukada S, Inoue S, Okubo T, Itakura M, Minamisawa K, et al. (2015). Identification of the hydrogen uptake gene cluster for chemolithoautotrophic growth and symbiosis hydrogen uptake in <em>Bradyrhizobium diazoefficiens</em>. <em>Frontiers in Microbiology</em> 6:1034.
+        [<a href="https://doi.org/10.3389/fmicb.2015.01034" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/26483779/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4791120/" target="_blank">PMC</a>]
+        <span class="ref-note">Documents two hupSL copies (hupS1L1 and hupS2L2) in B. diazoefficiens USDA110; dual-cluster organisation.</span>
+      </li>
+      <li>
+        <span class="ref-id">R40</span>
+        Albrecht SL, Maier RJ, Hanus FJ, Russell SA, Emerich DW, Evans HJ. (1979). Hydrogenase in <em>Rhizobium japonicum</em> increases nitrogen fixation by nodulated soybeans. <em>Science</em> 203(4384):1255–1257.
+        [<a href="https://doi.org/10.1126/science.203.4384.1255" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/17780930/" target="_blank">PubMed</a>]
+        <span class="ref-note">Landmark demonstration that Hup⁺ strains improve symbiotic N₂ fixation efficiency by recycling H₂.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ref-group">
+    <h3>T3SS / nop Genes — Type III Secretion and Effectors</h3>
+    <ul class="ref-list">
+      <li>
+        <span class="ref-id">R41</span>
+        Krause A, Doerfel A, Göttfert M. (2002). Mutational and transcriptional analysis of the type III secretion system of <em>Bradyrhizobium japonicum</em>. <em>Molecular Plant-Microbe Interactions</em> 15(12):1228–1235.
+        [<a href="https://doi.org/10.1094/MPMI.2002.15.12.1228" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/12481991/" target="_blank">PubMed</a>]
+        [<a href="https://apsjournals.apsnet.org/doi/10.1094/MPMI.2002.15.12.1228" target="_blank">Full Text</a>]
+        <span class="ref-note">First comprehensive characterisation of B. japonicum T3SS; ttsI regulation via nod box and NodW; nopB, rhcV defined.</span>
+      </li>
+      <li>
+        <span class="ref-id">R42</span>
+        Zehner S, Schober G, Wenzel M, Lang K, Göttfert M. (2008). Expression of the <em>Bradyrhizobium japonicum</em> type III secretion system in legume nodules and analysis of the associated tts box promoter. <em>Molecular Plant-Microbe Interactions</em> 21(8):1087–1093.
+        [<a href="https://doi.org/10.1094/MPMI-21-8-1087" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/18613796/" target="_blank">PubMed</a>]
+        [<a href="https://apsjournals.apsnet.org/doi/10.1094/MPMI-21-8-1087" target="_blank">Full Text</a>]
+        <span class="ref-note">Defines tts box promoter element; T3SS activity confirmed in mature nodules; rhcV, nopL, nopB expression.</span>
+      </li>
+      <li>
+        <span class="ref-id">R43</span>
+        Wenzel M, Friedrich L, Göttfert M, Zehner S. (2010). The type III-secreted protein NopE1 affects symbiosis and exhibits a calcium-dependent autocleavage activity. <em>Molecular Plant-Microbe Interactions</em> 23(1):112–117.
+        [<a href="https://doi.org/10.1094/MPMI-23-1-0112" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/19958147/" target="_blank">PubMed</a>]
+        <span class="ref-note">Defines NopE1 Ca²⁺-dependent autocleavage; nopE1/nopE2 two-paralog discovery in B. japonicum USDA110.</span>
+      </li>
+      <li>
+        <span class="ref-id">R44</span>
+        Ausmees N, Kobayashi H, Bhalerao RP, et al. (2004). Characterization of NopP, a type III secreted effector of <em>Rhizobium</em> sp. NGR234. <em>Journal of Bacteriology</em> 186(14):4774–4780.
+        [<a href="https://doi.org/10.1128/JB.186.14.4774-4780.2004" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/15231808/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC438571/" target="_blank">PMC</a>]
+        <span class="ref-note">Defines NopP effector; phosphorylation-based interaction with plant defence signalling.</span>
+      </li>
+      <li>
+        <span class="ref-id">R45</span>
+        Dai W-J, Zeng Y, Xie Z-P, Staehelin C. (2008). Symbiosis-promoting and deleterious effects of NopT, a novel type 3 effector of <em>Rhizobium</em> sp. NGR234. <em>Journal of Bacteriology</em> 190(14):5101–5110.
+        [<a href="https://doi.org/10.1128/JB.00306-08" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/18487327/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2447014/" target="_blank">PMC</a>]
+        <span class="ref-note">Characterises NopT YopT-family cysteine protease effector; host-range effects both positive and negative.</span>
+      </li>
+      <li>
+        <span class="ref-id">R46</span>
+        Fauvart M, Michiels J. (2008). Rhizobial secreted proteins as determinants of host specificity in the rhizobium-legume symbiosis. <em>FEMS Microbiology Letters</em> 285(1):1–9.
+        [<a href="https://doi.org/10.1111/j.1574-6968.2008.01254.x" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/18573142/" target="_blank">PubMed</a>]
+        <span class="ref-note">Review of all rhizobial nop effectors (nopB, nopC, nopL, nopM, nopP, nopT, nopX) and their host specificity roles.</span>
+      </li>
+      <li>
+        <span class="ref-id">R47</span>
+        Tampakaki AP. (2014). Commonalities and differences of T3SSs in rhizobia and plant pathogenic bacteria. <em>Frontiers in Plant Science</em> 5:114.
+        [<a href="https://doi.org/10.3389/fpls.2014.00114" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/24715895/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3970011/" target="_blank">PMC</a>]
+        <span class="ref-note">Comparative overview of rhcC, rhcJ, rhcN, rhcQ–rhcV structural genes; T3SS apparatus across rhizobia.</span>
+      </li>
+      <li>
+        <span class="ref-id">R48</span>
+        Marie C, Deakin WJ, Viprey V, Kopcinska J, Golinowski W, et al. (2003). Characterization of Nops, nodulation outer proteins, secreted via the type III secretion system of NGR234. <em>Molecular Plant-Microbe Interactions</em> 16(9):743–751.
+        [<a href="https://doi.org/10.1094/MPMI.2003.16.9.743" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/12971592/" target="_blank">PubMed</a>]
+        <span class="ref-note">Defines NopM (IpaH-type E3 ubiquitin ligase effector) and multiple nop effector proteins; two nopM copies in B. elkanii context.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ref-group">
+    <h3>Regulatory Genes and Other Symbiotic Support</h3>
+    <ul class="ref-list">
+      <li>
+        <span class="ref-id">R49</span>
+        Oldroyd GED, Murray JD, Poole PS, Downie JA. (2011). The rules of engagement in the legume-rhizobial symbiosis. <em>Annual Review of Genetics</em> 45:119–144.
+        [<a href="https://doi.org/10.1146/annurev-genet-110410-132549" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/21838550/" target="_blank">PubMed</a>]
+        <span class="ref-note">Broad review covering regulatory cascades, NodD, NifA, FixLJ, rpoN, and signal exchange in legume symbiosis.</span>
+      </li>
+      <li>
+        <span class="ref-id">R50</span>
+        Giraud E, Moulin L, Vallenet D, Barbe V, Cytryn E, et al. (2007). Legumes symbioses: absence of Nod genes in photosynthetic bradyrhizobia. <em>Science</em> 316(5829):1307–1312.
+        [<a href="https://doi.org/10.1126/science.1139548" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/17540897/" target="_blank">PubMed</a>]
+        <span class="ref-note">Landmark paper; nod-independent bradyrhizobia BTAi1/ORS278; nifV requirement for Aeschynomene strains; nosZ distribution.</span>
+      </li>
+      <li>
+        <span class="ref-id">R51</span>
+        Masson-Boivin C, Giraud E, Perret X, Batut J. (2009). Establishing nitrogen-fixing symbiosis with legumes: how many rhizobium recipes? <em>Trends in Microbiology</em> 17(10):458–466.
+        [<a href="https://doi.org/10.1016/j.tim.2009.07.004" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/19766492/" target="_blank">PubMed</a>]
+        <span class="ref-note">Evolutionary perspective on rhizobial symbiotic gene acquisition; covers regSR, fnrN, and regulatory diversity across genera.</span>
+      </li>
+      <li>
+        <span class="ref-id">R52</span>
+        Tian C-F, Zhou Y-J, Zhang Y-M, Li Q-Q, Zhang Y-Z, et al. (2012). Comparative genomics of rhizobia nodulating soybean suggests extensive recruitment of lineage-specific genes in adaptations. <em>Molecular Biology and Evolution</em> 29(11):2658–2676.
+        [<a href="https://doi.org/10.1093/molbev/mss130" target="_blank">DOI</a>]
+        [<a href="https://pubmed.ncbi.nlm.nih.gov/22513288/" target="_blank">PubMed</a>]
+        [<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3472497/" target="_blank">PMC</a>]
+        <span class="ref-note">Comparative genomics of soybean-nodulating rhizobia; context for rpoN, regSR and fnrN copy numbers and regulatory diversity.</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  Reference strains: <em>B. diazoefficiens</em> USDA110 · <em>B. japonicum</em> USDA6/E109 · <em>B. elkanii</em> 587 · <em>Bradyrhizobium</em> sp. DOA9/BTAi1/ORS278 · <em>S. meliloti</em> 1021 · <em>R. leguminosarum</em> Rlv3841 · NGR234 &nbsp;|&nbsp;
+  All DOI links resolve via <a href="https://doi.org" target="_blank">doi.org</a> · PubMed links via <a href="https://pubmed.ncbi.nlm.nih.gov" target="_blank">PubMed</a> · PMC links via <a href="https://pmc.ncbi.nlm.nih.gov" target="_blank">PMC</a><br>
+  Compiled for research purposes. Verify references independently before citation.
+</footer>
+
+<!-- ═══════════════════════ DATA & LOGIC ═══════════════════════ -->
+<script>
+const CONS_META={
+  U:{label:'Universal',desc:'All diazotrophic rhizobia',cls:'cons-U',sym:'●'},
+  C:{label:'Common',desc:'Most rhizobia; very few exceptions',cls:'cons-C',sym:'●'},
+  V:{label:'Variable',desc:'Widespread but genus/clade-restricted',cls:'cons-V',sym:'◐'},
+  R:{label:'Restricted',desc:'Species- or strain-specific',cls:'cons-R',sym:'○'},
+};
+
+const CAT_COLORS={nod:{bg:'#388e3c'},nol:{bg:'#8e24aa'},noe:{bg:'#e53935'},nif:{bg:'#1976d2'},fix:{bg:'#f57c00'},'hup/hyp':{bg:'#00897b'},'T3SS/nop':{bg:'#546e7a'},other:{bg:'#9e9d24'}};
+
+// ref tags: each gene maps to HTML spans with linked ref IDs
+const REFS={
+  nodA:'<a href="#r7">[R7]</a> <a href="#r9">[R9]</a>',
+  nodB:'<a href="#r9">[R9]</a> <a href="#r7">[R7]</a>',
+  nodC:'<a href="#r10">[R10]</a> <a href="#r7">[R7]</a>',
+  nodD:'<a href="#r7">[R7]</a> <a href="#r19">[R19]</a>',
+  nodE:'<a href="#r7">[R7]</a> <a href="#r6">[R6]</a>',
+  nodF:'<a href="#r7">[R7]</a> <a href="#r6">[R6]</a>',
+  nodG:'<a href="#r7">[R7]</a>',
+  nodH:'<a href="#r17">[R17]</a> <a href="#r7">[R7]</a>',
+  nodI:'<a href="#r8">[R8]</a> <a href="#r7">[R7]</a>',
+  nodJ:'<a href="#r8">[R8]</a> <a href="#r7">[R7]</a>',
+  nodL:'<a href="#r7">[R7]</a>',
+  nodM:'<a href="#r13">[R13]</a> <a href="#r7">[R7]</a>',
+  nodN:'<a href="#r13">[R13]</a>',
+  nodP:'<a href="#r17">[R17]</a>',
+  nodQ:'<a href="#r17">[R17]</a>',
+  nodS:'<a href="#r16">[R16]</a>',
+  nodT:'<a href="#r8">[R8]</a>',
+  nodU:'<a href="#r7">[R7]</a> <a href="#r6">[R6]</a>',
+  nodV:'<a href="#r19">[R19]</a>',
+  nodW:'<a href="#r19">[R19]</a>',
+  nodX:'<a href="#r7">[R7]</a>',
+  nodY:'<a href="#r19">[R19]</a>',
+  nodZ:'<a href="#r11">[R11]</a> <a href="#r7">[R7]</a>',
+  nolA:'<a href="#r12">[R12]</a> <a href="#r41">[R41]</a>',
+  nolB:'<a href="#r7">[R7]</a>',
+  nolK:'<a href="#r14">[R14]</a> <a href="#r7">[R7]</a>',
+  nolL:'<a href="#r15">[R15]</a>',
+  nolO:'<a href="#r7">[R7]</a>',
+  nolT:'<a href="#r7">[R7]</a>',
+  nolU:'<a href="#r7">[R7]</a>',
+  nolV:'<a href="#r6">[R6]</a>',
+  nolW:'<a href="#r7">[R7]</a>',
+  nolX:'<a href="#r41">[R41]</a> <a href="#r46">[R46]</a>',
+  nolY:'<a href="#r6">[R6]</a>',
+  noeA:'<a href="#r7">[R7]</a>',
+  noeB:'<a href="#r7">[R7]</a>',
+  noeC:'<a href="#r14">[R14]</a>',
+  noeD:'<a href="#r7">[R7]</a>',
+  noeE:'<a href="#r6">[R6]</a>',
+  noeH:'<a href="#r7">[R7]</a>',
+  noeI:'<a href="#r18">[R18]</a> <a href="#r7">[R7]</a>',
+  noeJ:'<a href="#r7">[R7]</a>',
+  noeK:'<a href="#r7">[R7]</a>',
+  noeL:'<a href="#r14">[R14]</a>',
+  noeM:'<a href="#r7">[R7]</a>',
+  nifH:'<a href="#r20">[R20]</a> <a href="#r21">[R21]</a> <a href="#r22">[R22]</a>',
+  nifD:'<a href="#r21">[R21]</a> <a href="#r20">[R20]</a>',
+  nifK:'<a href="#r21">[R21]</a> <a href="#r20">[R20]</a>',
+  nifE:'<a href="#r22">[R22]</a> <a href="#r20">[R20]</a>',
+  nifN:'<a href="#r22">[R22]</a> <a href="#r20">[R20]</a>',
+  nifB:'<a href="#r22">[R22]</a> <a href="#r20">[R20]</a>',
+  nifA:'<a href="#r23">[R23]</a> <a href="#r20">[R20]</a> <a href="#r24">[R24]</a>',
+  nifS:'<a href="#r22">[R22]</a>',
+  nifU:'<a href="#r22">[R22]</a>',
+  nifV:'<a href="#r50">[R50]</a>',
+  nifW:'<a href="#r22">[R22]</a>',
+  nifX:'<a href="#r22">[R22]</a>',
+  nifY:'<a href="#r22">[R22]</a>',
+  nifZ:'<a href="#r22">[R22]</a>',
+  nifQ:'<a href="#r22">[R22]</a>',
+  nifT:'<a href="#r22">[R22]</a>',
+  fixA:'<a href="#r31">[R31]</a> <a href="#r32">[R32]</a>',
+  fixB:'<a href="#r31">[R31]</a> <a href="#r32">[R32]</a>',
+  fixC:'<a href="#r31">[R31]</a> <a href="#r32">[R32]</a>',
+  fixX:'<a href="#r32">[R32]</a>',
+  fixN:'<a href="#r26">[R26]</a> <a href="#r28">[R28]</a>',
+  fixO:'<a href="#r26">[R26]</a>',
+  fixQ:'<a href="#r26">[R26]</a>',
+  fixP:'<a href="#r26">[R26]</a>',
+  fixG:'<a href="#r27">[R27]</a>',
+  fixH:'<a href="#r27">[R27]</a>',
+  fixI:'<a href="#r27">[R27]</a>',
+  fixS:'<a href="#r27">[R27]</a>',
+  fixL:'<a href="#r20">[R20]</a> <a href="#r29">[R29]</a>',
+  fixJ:'<a href="#r20">[R20]</a> <a href="#r29">[R29]</a>',
+  fixK:'<a href="#r30">[R30]</a> <a href="#r20">[R20]</a>',
+  fixR:'<a href="#r29">[R29]</a>',
+  fixT:'<a href="#r20">[R20]</a>',
+  hupS:'<a href="#r35">[R35]</a> <a href="#r39">[R39]</a>',
+  hupL:'<a href="#r35">[R35]</a> <a href="#r39">[R39]</a>',
+  hupC:'<a href="#r34">[R34]</a>',
+  hupD:'<a href="#r34">[R34]</a>',
+  hupF:'<a href="#r34">[R34]</a>',
+  hupG:'<a href="#r36">[R36]</a>',
+  hupH:'<a href="#r36">[R36]</a>',
+  hupI:'<a href="#r36">[R36]</a>',
+  hupJ:'<a href="#r36">[R36]</a>',
+  hupK:'<a href="#r36">[R36]</a>',
+  hupT:'<a href="#r38">[R38]</a>',
+  hupU:'<a href="#r37">[R37]</a>',
+  hupV:'<a href="#r37">[R37]</a>',
+  hypA:'<a href="#r34">[R34]</a>',
+  hypB:'<a href="#r34">[R34]</a>',
+  hypC:'<a href="#r34">[R34]</a>',
+  hypD:'<a href="#r34">[R34]</a>',
+  hypE:'<a href="#r34">[R34]</a>',
+  hypF:'<a href="#r34">[R34]</a>',
+  nopB:'<a href="#r42">[R42]</a> <a href="#r46">[R46]</a>',
+  nopC:'<a href="#r46">[R46]</a>',
+  nopD:'<a href="#r46">[R46]</a>',
+  nopE:'<a href="#r43">[R43]</a>',
+  nopL:'<a href="#r46">[R46]</a> <a href="#r42">[R42]</a>',
+  nopM:'<a href="#r48">[R48]</a>',
+  nopP:'<a href="#r44">[R44]</a> <a href="#r46">[R46]</a>',
+  nopT:'<a href="#r45">[R45]</a> <a href="#r46">[R46]</a>',
+  nopX:'<a href="#r41">[R41]</a> <a href="#r46">[R46]</a>',
+  ttsI:'<a href="#r41">[R41]</a> <a href="#r42">[R42]</a>',
+  'rhcC1/rhcC2':'<a href="#r47">[R47]</a> <a href="#r41">[R41]</a>',
+  rhcJ:'<a href="#r47">[R47]</a>',
+  rhcN:'<a href="#r47">[R47]</a>',
+  rhcQ:'<a href="#r47">[R47]</a>',
+  rhcR:'<a href="#r47">[R47]</a>',
+  rhcS:'<a href="#r47">[R47]</a>',
+  rhcT:'<a href="#r47">[R47]</a>',
+  rhcU:'<a href="#r47">[R47]</a>',
+  rhcV:'<a href="#r47">[R47]</a> <a href="#r42">[R42]</a>',
+  nosZ:'<a href="#r1">[R1]</a> <a href="#r33">[R33]</a>',
+  'regR (regSR)':'<a href="#r29">[R29]</a> <a href="#r33">[R33]</a>',
+  'rpoN (ntrA)':'<a href="#r25">[R25]</a> <a href="#r20">[R20]</a>',
+  'nifR3 (ntrX)':'<a href="#r20">[R20]</a>',
+  fnrN:'<a href="#r33">[R33]</a> <a href="#r20">[R20]</a>',
+  fdxN:'<a href="#r53">[R53]</a> <a href="#r54">[R54]</a>',
+  'frxA (fdxA)':'<a href="#r55">[R55]</a> <a href="#r53">[R53]</a>',
+  etfS:'<a href="#r56">[R56]</a>',
+  etfL:'<a href="#r56">[R56]</a>',
+};
+
+// Add anchor IDs to reference list items so in-page links work
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.ref-list li').forEach(li=>{
+    const id=li.querySelector('.ref-id');
+    if(id){li.id='r'+id.textContent.replace(/[^0-9]/g,'');}
+  });
+});
+
+const genes=[
+  {cat:'nod',gene:'nodA',func:'N-acyltransferase; transfers fatty acyl chain onto the non-reducing end GlcNAc of chitin backbone',org:'Bradyrhizobium / all rhizobia',copy:1,notes:'Core nod gene; universal'},
+  {cat:'nod',gene:'nodB',func:'Chitooligosaccharide deacetylase; removes N-acetyl group from non-reducing end GlcNAc',org:'Bradyrhizobium / all rhizobia',copy:1,notes:'Core nod gene'},
+  {cat:'nod',gene:'nodC',func:'N-acetylglucosaminyltransferase; polymerises GlcNAc units to build chitooligosaccharide backbone',org:'Bradyrhizobium / all rhizobia',copy:1,notes:'Core; determines chain length'},
+  {cat:'nod',gene:'nodD',func:'LysR-type transcriptional activator; binds plant flavonoids (e.g. genistein) and activates nod gene expression via nod boxes',org:'Bradyrhizobium / all rhizobia',copy:3,notes:'Up to 3 paralogs (nodD1–3); regulates own expression'},
+  {cat:'nod',gene:'nodE',func:'β-ketoacyl synthase; specifies the fatty acid chain attached to Nod factor by NodA',org:'Bradyrhizobium, many rhizobia',copy:1,notes:'Host specificity determinant; works with NodF'},
+  {cat:'nod',gene:'nodF',func:'Acyl carrier protein; shuttles fatty acid to NodA for Nod factor acylation',org:'Bradyrhizobium, many rhizobia',copy:1,notes:'Host specificity; partner of NodE'},
+  {cat:'nod',gene:'nodG',func:'3-oxoacyl-ACP reductase; involved in fatty acid chain modification for Nod factor',org:'Some rhizobia',copy:1,notes:'Not universal in Bradyrhizobium'},
+  {cat:'nod',gene:'nodH',func:'Sulfotransferase; transfers sulfate from PAPS onto the reducing end of the Nod factor',org:'Sinorhizobium meliloti; absent in most Bradyrhizobium',copy:1,notes:'Absent in B. japonicum; host specificity'},
+  {cat:'nod',gene:'nodI',func:'ABC transporter (NBD subunit); exports Nod factors across the inner membrane',org:'Bradyrhizobium / all rhizobia',copy:1,notes:'Part of nodIJ export system'},
+  {cat:'nod',gene:'nodJ',func:'ABC transporter (TMD subunit); membrane component of LCO export system',org:'Bradyrhizobium / all rhizobia',copy:1,notes:'Part of nodIJ export system'},
+  {cat:'nod',gene:'nodL',func:'O-acetyltransferase; acetylates the C-6 position of the non-reducing GlcNAc',org:'Many rhizobia; occasional in Bradyrhizobium',copy:1,notes:'Host-specificity modification'},
+  {cat:'nod',gene:'nodM',func:'Glucosamine-6-phosphate synthase; provides GlcN-6-P substrate for chitin backbone synthesis',org:'Bradyrhizobium / many rhizobia',copy:1,notes:'Metabolic support gene'},
+  {cat:'nod',gene:'nodN',func:'Unknown function; linked to Nod signal production and bacteroid maturation',org:'Some rhizobia',copy:1,notes:'Not fully characterised'},
+  {cat:'nod',gene:'nodP',func:'ATP sulfurylase α-subunit; activates inorganic sulfate to APS for nodH reaction',org:'Sinorhizobium, some Bradyrhizobium',copy:1,notes:'Sulfation pathway; co-operates with nodQ'},
+  {cat:'nod',gene:'nodQ',func:'ATP sulfurylase / APS kinase (bifunctional); generates PAPS for sulfotransferase reactions',org:'S. meliloti; B. elkanii for sulfation',copy:1,notes:'Bifunctional enzyme'},
+  {cat:'nod',gene:'nodS',func:'N-methyltransferase; methylates the amine of the non-reducing GlcNAc residue of Nod factor',org:'B. elkanii, Azorhizobium',copy:1,notes:'Host-range determinant'},
+  {cat:'nod',gene:'nodT',func:'Outer membrane protein (TolC family); exports Nod factors across the outer membrane',org:'Bradyrhizobium, some rhizobia',copy:1,notes:'Not universal across all Bradyrhizobium'},
+  {cat:'nod',gene:'nodU',func:'Carbamoyltransferase; adds carbamoyl group to C-6 of specific GlcNAc in Nod factor',org:'B. elkanii, some B. japonicum strains',copy:1,notes:'Host specificity determinant; key in B. elkanii'},
+  {cat:'nod',gene:'nodV',func:'Histidine sensor kinase (NodVW two-component system); perceives LCO signals',org:'Some Bradyrhizobium strains',copy:1,notes:'Regulatory'},
+  {cat:'nod',gene:'nodW',func:'Response regulator; partner of NodV; modulates nod gene expression; also activates ttsI',org:'Some Bradyrhizobium strains',copy:1,notes:'Regulatory; ttsI activation partner'},
+  {cat:'nod',gene:'nodX',func:'O-acetyltransferase; acetylation of reducing-end GlcNAc for host range extension',org:'R. leguminosarum bv. viciae',copy:1,notes:'Rare in Bradyrhizobium'},
+  {cat:'nod',gene:'nodY',func:'Regulatory region linked to nodABC; co-regulated with nodABC operon',org:'Some Bradyrhizobium',copy:1,notes:'Species/strain-specific'},
+  {cat:'nod',gene:'nodZ',func:'Fucosyltransferase; adds fucose to the reducing end of the Nod factor backbone',org:'B. japonicum, B. elkanii',copy:1,notes:'Key B. japonicum host range determinant'},
+  {cat:'nol',gene:'nolA',func:'MerR-family transcriptional regulator; represses nodD2 and controls genotype-specific nodulation; produces two proteins from alternative start codons',org:'B. japonicum',copy:1,notes:'Unique to some B. japonicum strains; also regulates T3SS'},
+  {cat:'nol',gene:'nolB',func:'Putative outer membrane lipoprotein; assists Nod factor secretion',org:'Bradyrhizobium, some rhizobia',copy:1,notes:'Accessory export role'},
+  {cat:'nol',gene:'nolK',func:'GDP-fucose biosynthesis oxidoreductase; provides GDP-fucose substrate for NodZ fucosyltransferase',org:'B. japonicum, B. elkanii',copy:1,notes:'Works in conjunction with nodZ'},
+  {cat:'nol',gene:'nolL',func:'O-acetyltransferase; acetylates the fucosyl residue added by NodZ on B. elkanii Nod factors',org:'B. elkanii, some strains',copy:1,notes:'Strain-specific host-range determinant'},
+  {cat:'nol',gene:'nolO',func:'Carbamoyltransferase; carbamoylates Nod factor at position distinct from NodU',org:'Some Bradyrhizobium, NGR234',copy:1,notes:'Accessory decoration'},
+  {cat:'nol',gene:'nolT',func:'LysR-type transcriptional regulator; linked to nod-nif gene cluster; phylogenetic marker',org:'Mesorhizobium, some Bradyrhizobium',copy:1,notes:'Regulatory; phylogenetic marker'},
+  {cat:'nol',gene:'nolU',func:'Unknown function; linked to Nod factor modification',org:'Some rhizobia',copy:1,notes:'Not fully characterised'},
+  {cat:'nol',gene:'nolV',func:'Unknown; putative Nod factor modification or regulation',org:'B. elkanii',copy:1,notes:'Species/strain-specific'},
+  {cat:'nol',gene:'nolW',func:'Unknown; nod gene cluster-associated regulatory role',org:'Some rhizobia',copy:1,notes:'Function poorly defined'},
+  {cat:'nol',gene:'nolX',func:'T3SS effector translocator (Nop); forms pore in plant membrane for effector delivery — also designated nopX',org:'B. japonicum, B. elkanii',copy:1,notes:'Structural T3SS component'},
+  {cat:'nol',gene:'nolY',func:'Transcriptional repressor of nod gene expression',org:'B. elkanii',copy:1,notes:'Negative regulator; strain-specific'},
+  {cat:'noe',gene:'noeA',func:'Methyltransferase; methyl modification of Nod factor or membrane lipid',org:'Some Bradyrhizobium, Sinorhizobium',copy:1,notes:'Host specificity'},
+  {cat:'noe',gene:'noeB',func:'Unknown; possible regulatory role in Nod factor decoration pathway',org:'Some rhizobia',copy:1,notes:'Not fully characterised'},
+  {cat:'noe',gene:'noeC',func:'Unknown; involved in Nod factor modification or export; linked to fucosylation pathway',org:'Some Bradyrhizobium, Rhizobium',copy:1,notes:'Accessory modification gene'},
+  {cat:'noe',gene:'noeD',func:'Unknown accessory function in Nod factor pathway',org:'Some rhizobia',copy:1,notes:'Rare; strain-specific'},
+  {cat:'noe',gene:'noeE',func:'Sulfotransferase; sulfation of the fucosyl residue on B. elkanii Nod factor (distinct from nodH)',org:'B. elkanii',copy:1,notes:'B. elkanii-specific; functional analogue of nodH'},
+  {cat:'noe',gene:'noeH',func:'Unknown; linked to regulation of Nod factor structure',org:'Some rhizobia',copy:1,notes:'Accessory'},
+  {cat:'noe',gene:'noeI',func:'2-O-methyltransferase; methylates the fucosyl residue on B. japonicum Nod factor at 2-O position',org:'B. japonicum, B. elkanii',copy:1,notes:'Fine-tunes host specificity in B. japonicum'},
+  {cat:'noe',gene:'noeJ',func:'Mannose-1-phosphate guanylyltransferase; provides GDP-mannose precursor for Nod factor',org:'Some Rhizobium; accessory in bradyrhizobia',copy:1,notes:'Metabolic support for sugar decoration'},
+  {cat:'noe',gene:'noeK',func:'Phosphomannomutase; GDP-mannose biosynthesis pathway for Nod factor decoration',org:'Some Rhizobium',copy:1,notes:'Rare in Bradyrhizobium'},
+  {cat:'noe',gene:'noeL',func:'GDP-mannose 4,6-dehydratase; participates in GDP-fucose biosynthesis pathway',org:'Sinorhizobium, some Bradyrhizobium',copy:1,notes:'Fucose precursor pathway, together with nolK'},
+  {cat:'noe',gene:'noeM',func:'Unknown; putative fucosylation accessory function',org:'Some rhizobia',copy:1,notes:'Not fully characterised'},
+  {cat:'nif',gene:'nifH',func:'Dinitrogenase reductase (Fe-protein); transfers electrons via ATP hydrolysis to the MoFe-protein; most widely used phylogenetic marker',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'2 paralogs (nifH1/H2) in some Bradyrhizobium; key phylogenetic marker'},
+  {cat:'nif',gene:'nifD',func:'Dinitrogenase α-subunit (MoFe-protein); contains active site P-cluster and FeMo-co; binds and reduces N₂',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Forms α₂β₂ tetramer with NifK'},
+  {cat:'nif',gene:'nifK',func:'Dinitrogenase β-subunit (MoFe-protein); structural partner of NifD; contains P-cluster',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Forms α₂β₂ tetramer with NifD'},
+  {cat:'nif',gene:'nifE',func:'FeMo-co biosynthesis scaffold (NifEN complex); binds molybdate and provides assembly platform for FeMo-co',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Forms NifE-NifN heterotetramer'},
+  {cat:'nif',gene:'nifN',func:'FeMo-co biosynthesis scaffold partner; part of NifEN complex',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Essential for FeMo-co assembly'},
+  {cat:'nif',gene:'nifB',func:'Radical SAM enzyme; synthesises NifB-co (Fe-S cluster precursor) essential for FeMo-co biosynthesis',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Universally essential for nitrogenase'},
+  {cat:'nif',gene:'nifA',func:'σ⁵⁴-dependent transcriptional activator; master regulator of all nif and fix genes; oxygen-sensitive via central domain',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'Typical: 1 copy. 2 copies in Bradyrhizobium sp. DOA9 and M. loti; regulated from fixR-nifA operon in B. japonicum'},
+  {cat:'nif',gene:'nifS',func:'Cysteine desulfurase (PLP-dependent); mobilises sulfur from L-cysteine for Fe-S cluster assembly in nitrogenase',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of NifSU scaffold system'},
+  {cat:'nif',gene:'nifU',func:'Fe-S cluster scaffold protein; assembles [4Fe-4S] clusters and donates them to nitrogenase components',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of NifSU scaffold system'},
+  {cat:'nif',gene:'nifV',func:'Homocitrate synthase; synthesises homocitrate required for FeMo-co completion',org:'Free-living diazotrophs; some Bradyrhizobium (Aeschynomene nodulators)',copy:1,notes:'Absent in most Bradyrhizobium; host provides homocitrate via plant FEN1 enzyme'},
+  {cat:'nif',gene:'nifW',func:'Nitrogenase-protective chaperone; shields MoFe-protein (NifDK) from O₂ during maturation',org:'Most diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Structural chaperone/protector during assembly'},
+  {cat:'nif',gene:'nifX',func:'Transiently binds FeMo-co intermediates (NifB-co and VK-cluster); molybdate/NifB-co carrier protein',org:'Most diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'FeMo-co biosynthesis intermediate handler'},
+  {cat:'nif',gene:'nifY',func:'Chaperone for late-stage insertion of FeMo-co into apo-dinitrogenase',org:'Some diazotrophic rhizobia',copy:1,notes:'Functional analog of nifZ in some species'},
+  {cat:'nif',gene:'nifZ',func:'P-cluster assembly maturation factor; required for full nitrogenase MoFe-protein activity',org:'Most diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Required for full nitrogenase activity'},
+  {cat:'nif',gene:'nifQ',func:'Molybdenum processing enzyme; important for FeMo-co biosynthesis under low-Mo conditions',org:'Bradyrhizobium, some diazotrophic rhizobia',copy:1,notes:'Important under Mo-limiting conditions'},
+  {cat:'nif',gene:'nifT',func:'Conserved small protein in nif clusters; function not defined; dispensable in some organisms',org:'Some Bradyrhizobium',copy:1,notes:'Function unknown; dispensable in some organisms'},
+  {cat:'nif',gene:'fdxN',func:'[2Fe-2S] or [4Fe-4S] bacterial-type ferredoxin; required for efficient symbiotic nitrogen fixation; candidate direct electron donor to nitrogenase; NifA+σ⁵⁴-regulated',org:'B. japonicum, B. diazoefficiens, S. meliloti, R. leguminosarum, Herbaspirillum',copy:1,notes:'In S. meliloti, absolutely required for Fix⁺ phenotype; in B. japonicum identified as part of the NifA+σ⁵⁴ regulon; co-transcribed with nifA-nifB in some rhizobia'},
+  {cat:'nif',gene:'frxA (fdxA)',func:'[4Fe-4S] ferredoxin-like protein; nif-associated electron carrier distinct from FdxN; may donate electrons to nitrogenase or participate in Fe-S cluster assembly',org:'B. japonicum (frxA); Herbaspirillum seropedicae (fdxA)',copy:1,notes:'Originally identified as frxA in B. japonicum (Ebeling et al. 1988); in Herbaspirillum fdxA mutants show ~70% reduction in nitrogenase activity'},
+  {cat:'fix',gene:'fixA',func:'Flavoprotein subunit of electron-bifurcating FixABCX complex; generates low-potential electrons for nitrogenase from NADH/NADPH',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'NifA-regulated; essential for symbiotic N₂ fixation'},
+  {cat:'fix',gene:'fixB',func:'Second flavoprotein subunit of FixABCX electron-bifurcating complex',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of fixABCX operon'},
+  {cat:'fix',gene:'fixC',func:'Putative oxidoreductase subunit of FixABCX; mediates electron bifurcation',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of fixABCX operon'},
+  {cat:'fix',gene:'fixX',func:'Ferredoxin-like subunit of FixABCX; low-potential electron carrier',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of fixABCX operon; ferredoxin-type electron carrier'},
+  {cat:'fix',gene:'etfS',func:'β-subunit of housekeeping electron transfer flavoprotein (ETF); involved in fatty acid β-oxidation; distinct from FixA (group II ETF)',org:'B. japonicum; broadly in rhizobia',copy:1,notes:'Aerobically expressed; part of etfSL operon; Group I ETF — distinct from symbiosis-specific FixA/FixB'},
+  {cat:'fix',gene:'etfL',func:'α-subunit of housekeeping electron transfer flavoprotein (ETF); links acyl-CoA dehydrogenase reactions with respiratory chain',org:'B. japonicum; broadly in rhizobia',copy:1,notes:'Aerobically expressed; partner of EtfS; Group I ETF; functionally distinct from FixB'},
+  {cat:'fix',gene:'fixN',func:'Catalytic subunit I of cbb3-type cytochrome c oxidase (fixNOQP operon); heme b and copper-binding; microaerobic terminal oxidase',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'2 copies in R. etli (p42d/p42f); essential for O₂ consumption in bacteroids'},
+  {cat:'fix',gene:'fixO',func:'Monoheme cytochrome c subunit of cbb3 oxidase; electron donor to FixN catalytic subunit',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'Part of fixNOQP operon; 2 copies in some strains'},
+  {cat:'fix',gene:'fixQ',func:'Small accessory subunit (54 aa) of cbb3 oxidase; role in complex stability/assembly',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'Part of fixNOQP operon'},
+  {cat:'fix',gene:'fixP',func:'Diheme cytochrome c subunit of cbb3 oxidase; electron transfer chain component',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'Part of fixNOQP operon'},
+  {cat:'fix',gene:'fixG',func:'Cu-transporting P1B-ATPase; delivers copper for cbb3 oxidase subunit assembly',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'fixGHIS operon; 2 copies in some strains'},
+  {cat:'fix',gene:'fixH',func:'Periplasmic protein of unknown function; involved in cbb3 oxidase biogenesis',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of fixGHIS operon'},
+  {cat:'fix',gene:'fixI',func:'P1B-type Cu-transporting ATPase; delivers copper to the periplasm for cbb3 assembly',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of fixGHIS operon; copper chaperone'},
+  {cat:'fix',gene:'fixS',func:'Putative small copper chaperone; supports cbb3 oxidase biogenesis',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:1,notes:'Part of fixGHIS operon'},
+  {cat:'fix',gene:'fixL',func:'Heme-based O₂-sensing histidine kinase; phosphorylates FixJ under microaerobic conditions',org:'All rhizobia with FixLJ cascade',copy:1,notes:'Master O₂ sensor; two-component system kinase'},
+  {cat:'fix',gene:'fixJ',func:'Response regulator; phosphorylated by FixL; activates fixK and/or nifA transcription',org:'All rhizobia with FixLJ cascade',copy:1,notes:'Two-component system regulator'},
+  {cat:'fix',gene:'fixK',func:'FNR-family transcriptional activator; activates fixNOQP, fixGHIS, and other microaerobic genes via anaerobox',org:'All diazotrophic Bradyrhizobium / rhizobia',copy:2,notes:'B. japonicum has fixK1 and fixK2; FixK2 is the main activator of fixNOQP'},
+  {cat:'fix',gene:'fixR',func:'Flavoprotein reductase; co-transcribed with nifA in the fixR-nifA operon; role in redox sensing',org:'B. japonicum, B. diazoefficiens',copy:1,notes:'Operon activated by RegSR (not FixLJ) in B. japonicum'},
+  {cat:'fix',gene:'fixT',func:'Anti-FixJ factor; inhibitor of the FixLJ regulatory cascade; negative feedback regulator',org:'S. meliloti, some rhizobia',copy:1,notes:'Regulatory; less common in Bradyrhizobium'},
+  {cat:'hup/hyp',gene:'hupS',func:'Small subunit of [NiFe]-uptake hydrogenase; contains Fe-S clusters for electron transfer',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:2,notes:'B. diazoefficiens USDA110 has hupS1 and hupS2'},
+  {cat:'hup/hyp',gene:'hupL',func:'Large subunit of [NiFe]-uptake hydrogenase; contains the NiFe active site; C-terminally processed by HupD',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:2,notes:'B. diazoefficiens USDA110 has hupL1 and hupL2'},
+  {cat:'hup/hyp',gene:'hupC',func:'b-type cytochrome; accepts electrons from HupSL and transfers to the electron transport chain; membrane anchor',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Links hydrogenase to ETC'},
+  {cat:'hup/hyp',gene:'hupD',func:'Endopeptidase; cleaves C-terminal peptide of HupL during post-translational maturation',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Post-translational processing of HupL'},
+  {cat:'hup/hyp',gene:'hupF',func:'Chaperone; stabilises HupL prior to NiFe cofactor insertion',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Maturation chaperone; prevents premature folding'},
+  {cat:'hup/hyp',gene:'hupG',func:'Accessory protein for HupL processing; homolog of E. coli HyaE (hydrogenase-1 maturation protein)',org:'B. japonicum',copy:1,notes:'~15.8 kDa; involvement in HupL processing'},
+  {cat:'hup/hyp',gene:'hupH',func:'Accessory chaperone for HupL subunit assembly (~30.7 kDa)',org:'B. japonicum',copy:1,notes:'Assembly chaperone'},
+  {cat:'hup/hyp',gene:'hupI',func:'Rubredoxin-like electron carrier; possible role in electron transfer during hydrogenase assembly',org:'B. japonicum',copy:1,notes:'~7.6 kDa; strong identity to rubredoxin'},
+  {cat:'hup/hyp',gene:'hupJ',func:'Accessory protein; role related to Ni processing in hydrogenase maturation (~18.1 kDa)',org:'B. japonicum',copy:1,notes:'Ni-related maturation'},
+  {cat:'hup/hyp',gene:'hupK',func:'Key scaffold for transient [NiFe] cluster assembly; delivers the NiFe centre to HupL active site',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'~38 kDa; essential maturation scaffold'},
+  {cat:'hup/hyp',gene:'hupT',func:'Histidine kinase sensor of H₂; represses hupSL expression in absence of H₂; NtrB-family kinase',org:'B. japonicum, some rhizobia',copy:1,notes:'H₂-responsive transcriptional repressor of hupSL'},
+  {cat:'hup/hyp',gene:'hupU',func:'Regulatory [NiFe] hydrogenase (H₂ sensor); senses H₂ availability and signals through HupT',org:'B. japonicum, some rhizobia',copy:1,notes:'Sensory, not catalytic hydrogenase'},
+  {cat:'hup/hyp',gene:'hupV',func:'Large subunit of regulatory hydrogenase; partner of HupU in H₂ signal transduction complex',org:'B. japonicum, some rhizobia',copy:1,notes:'Works with HupU and HupT'},
+  {cat:'hup/hyp',gene:'hypA',func:'Nickel metallochaperone; delivers Ni²⁺ to HypB for eventual insertion into [NiFe] active site',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Part of hyp maturation cluster'},
+  {cat:'hup/hyp',gene:'hypB',func:'GTPase; stores and releases Ni²⁺ via GTP hydrolysis for insertion into [NiFe] cofactor',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Part of hyp maturation cluster'},
+  {cat:'hup/hyp',gene:'hypC',func:'Chaperone; transiently binds HupL large subunit during [NiFe] cofactor insertion',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Part of hyp maturation cluster'},
+  {cat:'hup/hyp',gene:'hypD',func:'Delivers iron and CN⁻/CO ligands to form [NiFe] cofactor within HupL',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Part of hyp maturation cluster'},
+  {cat:'hup/hyp',gene:'hypE',func:'Synthesises CN⁻ ligand from carbamoyl-phosphate for [NiFe] cofactor; thiocarboxylate intermediate formed',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Part of hyp maturation cluster'},
+  {cat:'hup/hyp',gene:'hypF',func:'Carbamoyl-phosphate hydrolase; provides CN⁻ precursor (carbamoyl group) for [NiFe] cofactor via HypE',org:'Bradyrhizobium / Hup⁺ rhizobia',copy:1,notes:'Part of hyp maturation cluster'},
+  {cat:'T3SS/nop',gene:'nopB',func:'T3SS pilus rod protein; structural component of injection needle apparatus; required for effector delivery',org:'B. japonicum, B. elkanii',copy:1,notes:'T3SS structural gene; genistein-inducible'},
+  {cat:'T3SS/nop',gene:'nopC',func:'Putative T3SS pilus tip adhesin; involved in plant cell contact/recognition',org:'Some Bradyrhizobium, Sinorhizobium',copy:1,notes:'Structural T3SS component'},
+  {cat:'T3SS/nop',gene:'nopD',func:'Putative T3SS translocated protein/effector',org:'Some Bradyrhizobium, NGR234',copy:1,notes:'Strain-specific effector'},
+  {cat:'T3SS/nop',gene:'nopE',func:'T3SS effector; Ca²⁺-binding repeat protein; exhibits calcium-dependent autocleavage; host range modulator',org:'B. japonicum, B. diazoefficiens',copy:2,notes:'Two paralogs nopE1 and nopE2 in B. japonicum USDA110'},
+  {cat:'T3SS/nop',gene:'nopL',func:'T3SS effector; suppresses plant MAPK-based defence signalling; promotes nodulation on some hosts',org:'NGR234, B. japonicum, B. elkanii',copy:1,notes:'Pro-symbiotic effector on compatible hosts'},
+  {cat:'T3SS/nop',gene:'nopM',func:'T3SS effector; IpaH-family E3 ubiquitin ligase; suppresses plant innate immunity',org:'B. elkanii, some Bradyrhizobium',copy:2,notes:'Two copies in B. elkanii 587'},
+  {cat:'T3SS/nop',gene:'nopP',func:'T3SS effector; serine/threonine kinase target in plant; modulates host defence signalling',org:'NGR234, some Bradyrhizobium, Sinorhizobium',copy:1,notes:'Host-range extension on certain legumes'},
+  {cat:'T3SS/nop',gene:'nopT',func:'T3SS effector; YopT-family cysteine protease; cleaves plant immunity components; can restrict host range',org:'Some Bradyrhizobium, NGR234',copy:1,notes:'Strain-specific; both positive and negative host effects'},
+  {cat:'T3SS/nop',gene:'nopX',func:'T3SS translocator (pore-forming protein); forms translocation pore in plant cell membrane for effector delivery',org:'B. japonicum, B. elkanii',copy:1,notes:'Also known as nolX; essential T3SS component'},
+  {cat:'T3SS/nop',gene:'ttsI',func:'LysR-type transcriptional activator; master regulator of T3SS gene expression; activated by genistein via NodW/NodD',org:'B. japonicum, B. diazoefficiens, NGR234',copy:1,notes:'Flavonoid-inducible; activates nop genes via tts box'},
+  {cat:'T3SS/nop',gene:'rhcC1/rhcC2',func:'T3SS outer membrane ring (secretin family); forms channel through outer membrane for protein secretion',org:'Bradyrhizobium / rhizobia with T3SS',copy:2,notes:'Core T3SS apparatus; 2 paralogs in some strains'},
+  {cat:'T3SS/nop',gene:'rhcJ',func:'T3SS inner membrane component; stabilises the export apparatus',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS'},
+  {cat:'T3SS/nop',gene:'rhcN',func:'T3SS ATPase (YscN/FliI family); powers protein secretion via ATP hydrolysis',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS ATPase'},
+  {cat:'T3SS/nop',gene:'rhcQ',func:'T3SS inner membrane ring component (export apparatus)',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS'},
+  {cat:'T3SS/nop',gene:'rhcR',func:'T3SS export apparatus component (YscR family)',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS'},
+  {cat:'T3SS/nop',gene:'rhcS',func:'T3SS export apparatus component (YscS family)',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS'},
+  {cat:'T3SS/nop',gene:'rhcT',func:'T3SS export apparatus component (YscT family)',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS'},
+  {cat:'T3SS/nop',gene:'rhcU',func:'T3SS export apparatus component (FlhB/YscU family); substrate specificity switch',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS; substrate specificity'},
+  {cat:'T3SS/nop',gene:'rhcV',func:'T3SS inner membrane export gate (FlhA/YscV family); central component of export machinery',org:'Bradyrhizobium / rhizobia with T3SS',copy:1,notes:'Core T3SS; highly conserved; tts box regulated'},
+  {cat:'other',gene:'nosZ',func:'Nitrous oxide reductase; reduces N₂O to N₂ in the denitrification pathway; relevant to nodule gas metabolism and N₂O mitigation',org:'B. diazoefficiens USDA110, BTAi1, B. oligotrophicum S58',copy:1,notes:'Absent in some Bradyrhizobium; environmentally important'},
+  {cat:'other',gene:'regR (regSR)',func:'Two-component system response regulator; activates nifA (and other symbiotic genes) in response to redox state',org:'B. japonicum, B. diazoefficiens',copy:1,notes:'Replaces FixLJ as primary nifA activator in B. japonicum'},
+  {cat:'other',gene:'rpoN (ntrA)',func:'Alternative σ⁵⁴ RNA polymerase factor; required for NifA-dependent transcription from -24/-12 nif and fix gene promoters',org:'All rhizobia',copy:2,notes:'B. japonicum has rpoN1 and rpoN2 with different regulatory roles'},
+  {cat:'other',gene:'nifR3 (ntrX)',func:'Regulatory protein linked to nitrogen and sigma-54 control; modulates NifA activity',org:'Bradyrhizobium, some rhizobia',copy:1,notes:'Part of global N-regulatory network'},
+  {cat:'other',gene:'fnrN',func:'FNR-like O₂-sensing transcriptional activator; directly induces fixNOQP under near-anaerobic conditions in nodules',org:'R. leguminosarum, R. etli, some Bradyrhizobium',copy:1,notes:'Functionally equivalent to FixK2 in some systems; direct O₂ sensor via cysteine Fe-S cluster'},
+];
+
+// Conservation map: gene -> cons code
+const CONS_MAP={
+  nodA:'C',nodB:'C',nodC:'C',nodD:'C',nodE:'V',nodF:'V',nodG:'R',nodH:'R',
+  nodI:'C',nodJ:'C',nodL:'V',nodM:'V',nodN:'V',nodP:'R',nodQ:'R',nodS:'R',
+  nodT:'V',nodU:'R',nodV:'R',nodW:'R',nodX:'R',nodY:'R',nodZ:'V',
+  nolA:'R',nolB:'V',nolK:'R',nolL:'R',nolO:'R',nolT:'R',nolU:'R',nolV:'R',
+  nolW:'R',nolX:'V',nolY:'R',
+  noeA:'R',noeB:'R',noeC:'R',noeD:'R',noeE:'R',noeH:'R',noeI:'R',noeJ:'R',
+  noeK:'R',noeL:'R',noeM:'R',
+  nifH:'U',nifD:'U',nifK:'U',nifE:'U',nifN:'U',nifB:'U',nifA:'U',nifS:'U',
+  nifU:'U',nifV:'R',nifW:'C',nifX:'C',nifY:'V',nifZ:'C',nifQ:'V',nifT:'V',
+  fdxN:'C','frxA (fdxA)':'V',
+  fixA:'U',fixB:'U',fixC:'U',fixX:'U',etfS:'V',etfL:'V',
+  fixN:'U',fixO:'U',fixQ:'U',fixP:'U',fixG:'U',fixH:'U',fixI:'U',fixS:'U',
+  fixL:'C',fixJ:'C',fixK:'U',fixR:'V',fixT:'R',
+  hupS:'V',hupL:'V',hupC:'V',hupD:'V',hupF:'V',hupG:'V',hupH:'V',hupI:'V',
+  hupJ:'V',hupK:'V',hupT:'V',hupU:'V',hupV:'V',
+  hypA:'V',hypB:'V',hypC:'V',hypD:'V',hypE:'V',hypF:'V',
+  nopB:'V',nopC:'R',nopD:'R',nopE:'R',nopL:'V',nopM:'R',nopP:'V',nopT:'R',
+  nopX:'V',ttsI:'V','rhcC1/rhcC2':'V',rhcJ:'V',rhcN:'V',rhcQ:'V',rhcR:'V',
+  rhcS:'V',rhcT:'V',rhcU:'V',rhcV:'V',
+  nosZ:'R','regR (regSR)':'V','rpoN (ntrA)':'U','nifR3 (ntrX)':'V',fnrN:'V',
+};
+// Attach cons to every gene object
+genes.forEach(g=>{ g.cons = CONS_MAP[g.gene]||'R'; });
+
+const CATEGORIES=[
+  {id:'all',label:'All Genes'},
+  {id:'nod',label:'nod'},{id:'nol',label:'nol'},{id:'noe',label:'noe'},
+  {id:'nif',label:'nif'},{id:'fix',label:'fix'},
+  {id:'hup/hyp',label:'hup/hyp'},{id:'T3SS/nop',label:'T3SS/nop'},
+  {id:'other',label:'Regulatory/Other'},
+];
+
+let currentCat='all',currentCons='all',sortKey='gene',sortAsc=true,searchVal='';
+
+function catColor(c){return(CAT_COLORS[c]||{bg:'#888'}).bg;}
+
+function buildFilters(){
+  // Gene family filters
+  const row=document.getElementById('filterRow');
+  row.innerHTML='';
+  CATEGORIES.forEach(c=>{
+    const count=c.id==='all'?genes.length:genes.filter(g=>g.cat===c.id).length;
+    const btn=document.createElement('button');
+    btn.className='filter-btn'+(c.id===currentCat?' active':'');
+    btn.dataset.cat=c.id;
+    const bc=c.id==='all'?'#1a3a2a':catColor(c.id);
+    btn.style.borderColor=bc;
+    if(c.id===currentCat){btn.style.background=bc;}
+    btn.innerHTML=`${c.label} <span class="badge-count">${count}</span>`;
+    btn.onclick=()=>{currentCat=c.id;buildFilters();renderTable();};
+    row.appendChild(btn);
+  });
+  // Conservation filters
+  const crow=document.getElementById('consFilterRow');
+  // keep the label span, rebuild buttons only
+  const existing=[...crow.querySelectorAll('button')];
+  existing.forEach(b=>b.remove());
+  [{id:'all',label:'All'}, ...Object.entries(CONS_META).map(([k,v])=>({id:k,label:v.label}))].forEach(c=>{
+    const m=CONS_META[c.id];
+    const btn=document.createElement('button');
+    const isActive=currentCons===c.id;
+    btn.className='filter-btn'+(isActive?' active':'');
+    const bc=m?`var(--${m.cls.replace('cons-','cons-').replace('cons-','cons-')})`:(isActive?'#555':'#999');
+    // Use inline colors mapped from cons class
+    const colorMap={U:'#1a3a2a',C:'#1565c0',V:'#f57f17',R:'#c62828',all:'#555'};
+    const bcolor=colorMap[c.id]||'#555';
+    btn.style.borderColor=bcolor;
+    if(isActive){btn.style.background=bcolor;}
+    const cnt=c.id==='all'?genes.length:genes.filter(g=>g.cons===c.id).length;
+    const sym=m?m.sym:'';
+    btn.innerHTML=`${sym} ${c.label} <span class="badge-count">${cnt}</span>`;
+    btn.onclick=()=>{currentCons=c.id;buildFilters();renderTable();};
+    crow.appendChild(btn);
+  });
+  document.getElementById('totalCount').textContent=genes.length;
+}
+
+function getFiltered(){
+  return genes
+    .filter(g=>currentCat==='all'||g.cat===currentCat)
+    .filter(g=>currentCons==='all'||g.cons===currentCons)
+    .filter(g=>{
+      if(!searchVal)return true;
+      const sv=searchVal.toLowerCase();
+      return g.gene.toLowerCase().includes(sv)||g.func.toLowerCase().includes(sv)||
+             g.org.toLowerCase().includes(sv)||g.notes.toLowerCase().includes(sv);
+    })
+    .sort((a,b)=>{
+      let av=a[sortKey],bv=b[sortKey];
+      if(typeof av==='string'){av=av.toLowerCase();bv=bv.toLowerCase();}
+      if(av<bv)return sortAsc?-1:1;
+      if(av>bv)return sortAsc?1:-1;
+      return 0;
+    });
+}
+
+function renderTable(){
+  const data=getFiltered();
+  document.getElementById('countLabel').textContent=`Showing ${data.length} of ${genes.length} genes`;
+  const body=document.getElementById('tableBody');
+  if(!data.length){
+    body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:#aaa;font-style:italic;">No genes match your search.</td></tr>';
+    return;
+  }
+  body.innerHTML=data.map(g=>{
+    const bg=catColor(g.cat);
+    const refHtml=REFS[g.gene]||'—';
+    const cm=CONS_META[g.cons]||CONS_META.R;
+    const consBadge=`<span class="cons-badge cons-${g.cons}" title="${cm.desc}">${cm.sym} ${cm.label}</span>`;
+    return`<tr>
+      <td><span class="gene-name"><em>${g.gene}</em></span></td>
+      <td><span class="category-badge" style="background:${bg}">${g.cat}</span></td>
+      <td>${consBadge}</td>
+      <td style="max-width:320px;line-height:1.5;">${g.func}</td>
+      <td style="max-width:190px;font-style:italic;font-size:12.5px;color:#555;">${g.org}</td>
+      <td style="text-align:center;"><span class="copy-badge ${g.copy>1?'copy-gt1':'copy-1'}">${g.copy}</span></td>
+      <td style="max-width:210px;font-size:12.5px;color:#555;">${g.notes}</td>
+      <td class="refs">${refHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortTable(k){
+  if(sortKey===k){sortAsc=!sortAsc;}else{sortKey=k;sortAsc=true;}
+  renderTable();
+}
+
+document.getElementById('searchInput').addEventListener('input',function(){searchVal=this.value;renderTable();});
+
+// Assign anchor IDs to ref list items after DOM ready
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.ref-list li').forEach(li=>{
+    const id=li.querySelector('.ref-id');
+    if(id){li.id='r'+id.textContent.replace(/[^0-9]/g,'');}
+  });
+});
+
+buildFilters();
+renderTable();
+</script>
+</body>
+</html>
