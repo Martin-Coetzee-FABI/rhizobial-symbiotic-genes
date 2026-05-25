@@ -6,6 +6,16 @@ An interactive reference tool for symbiotic genes in *Bradyrhizobium* and relate
 
 ---
 
+## Intended use
+
+This resource is intended as a:
+
+- **Quick reference** during genome annotation and comparative genomics
+- **Teaching resource** for courses on biological nitrogen fixation and plant-microbe interactions
+- **Companion tool** for the rhizobial symbiotic gene search and future phylogeny pipeline (in development)
+
+---
+
 ## Overview
 
 Please take not that this is a work in progress and the author does not take responsibility for any errors at the time of publication.
@@ -96,16 +106,6 @@ gene function studies, and comparative genomics. Key reviews include:
 - Lindström & Mousavi (2020) *Microb. Biotechnol.* — Comprehensive review
 
 Full references with hyperlinks are available in the tool itself.
-
----
-
-## Intended use
-
-This resource is intended as a:
-
-- **Quick reference** during genome annotation and comparative genomics
-- **Teaching resource** for courses on biological nitrogen fixation and plant-microbe interactions
-- **Companion tool** for the rhizobial symbiotic gene search and phylogeny pipeline (see [pipeline repository link])
 
 ---
 
