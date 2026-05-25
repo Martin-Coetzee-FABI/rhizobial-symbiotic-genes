@@ -123,7 +123,8 @@ The entire tool is contained in `index.html`. To use it offline:
 
 If you use this resource in your research, please cite:
 
-> Coetzee M. (2025). Rhizobial Symbiotic Gene Compendium. Forestry and Agricultural Biotechnology Institute (FABI), University of Pretoria. Available at: https://YOUR-USERNAME.github.io/rhizobial-symbiotic-genes/
+> Coetzee MPA. (2025). Rhizobial Symbiotic Gene Compendium. Forestry and Agricultural Biotechnology Institute (FABI), University of Pretoria. Available at: https://Martin-FABI.github.io/rhizobial-symbiotic-genes/
+> Note that the code was developed with Claude AI (Anthropic).
 
 ---
 
