@@ -2,7 +2,7 @@
 
 An interactive reference tool for symbiotic genes in *Bradyrhizobium* and related rhizobia.
 
-**🔗 Live tool:** [https://Martin-FABI.github.io/rhizobial-symbiotic-genes/](https://Martin-FABI.github.io/rhizobial-symbiotic-genes/)
+**🔗 Live tool:** [https://Martin-Coetzee-FABI.github.io/rhizobial-symbiotic-genes/](https://Martin-Coetzee-FABI.github.io/rhizobial-symbiotic-genes/)
 
 ---
 
@@ -18,7 +18,7 @@ This resource is intended as a:
 
 ## Overview
 
-Please take not that this is a work in progress and the author does not take responsibility for any errors at the time of publication.
+Please note that this is a work in progress and the author does not take responsibility for any errors at the time of publication.
 
 This resource provides a curated, searchable reference table of **125 symbiotic genes** across eight gene families found in nitrogen-fixing rhizobia, with primary focus on *Bradyrhizobium* spp. Each entry includes the gene function, the organisms it is found in, the maximum reported genomic copy number, conservation status across diazotrophic rhizobia, and hyperlinked literature references.
 
@@ -123,7 +123,7 @@ The entire tool is contained in `index.html`. To use it offline:
 
 If you use this resource in your research, please cite:
 
-> Coetzee MPA. (2025). Rhizobial Symbiotic Gene Compendium. Forestry and Agricultural Biotechnology Institute (FABI), University of Pretoria. Available at: https://Martin-FABI.github.io/rhizobial-symbiotic-genes/
+> Coetzee MPA. (2025). Rhizobial Symbiotic Gene Compendium. Forestry and Agricultural Biotechnology Institute (FABI), University of Pretoria. Available at: https://Martin-Coetzee-FABI.github.io/rhizobial-symbiotic-genes/
 > > Note that the code was developed with Claude AI (Anthropic), and references are in the process of being checked and updated.
 
 ---
